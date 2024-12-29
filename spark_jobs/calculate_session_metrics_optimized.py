@@ -6,18 +6,9 @@ from pyspark.sql.functions import (
     avg,
     count,
     when,
-    unix_timestamp,
-    expr,
 )
 from pyspark.sql.window import Window
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    StringType,
-    TimestampType,
-    LongType,
-)
-from datetime import date, timedelta
+
 
 if __name__ == "__main__":
     # Initialize Spark session
