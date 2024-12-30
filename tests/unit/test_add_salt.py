@@ -1,5 +1,6 @@
-import pytest
 from unittest import mock
+
+import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
@@ -33,7 +34,7 @@ def test_add_salt(mock_spark, mock_df, skewed_keys):
     mock_df.withColumn.return_value = mock_df
 
     # Patch `rand` in the module where add_salt is defined to always return a fixed value (1)
-    with mock.patch('spark_jobs.dataset_join.rand', mock_rand):
+    with mock.patch("spark_jobs.dataset_join.rand", mock_rand):
         # Call the function
         result_df = add_salt(mock_df, skewed_keys)
 
@@ -43,7 +44,7 @@ def test_add_salt(mock_spark, mock_df, skewed_keys):
     # Check if `withColumn` was called with the correct column name and logic
     mock_df.withColumn.assert_called_once_with(
         "salted_user_id",
-        mock.ANY  # We use mock.ANY since the column expression will be more complex
+        mock.ANY,  # We use mock.ANY since the column expression will be more complex
     )
 
     # Verify that the 'user_id' column is being transformed correctly for skewed keys

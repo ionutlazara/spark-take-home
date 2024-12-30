@@ -1,8 +1,8 @@
-import pytest
 from unittest import mock
-from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType
 
+import pytest
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StringType, StructField, StructType
 
 from spark_jobs.dataset_parquet import parquet_write
 
@@ -35,12 +35,16 @@ def test_parquet_write(mock_spark, mock_df, mock_schema):
     mock_spark.read.csv.return_value = mock_df
 
     # Call the function with mocked Spark session, DataFrame, and schema
-    with mock.patch('spark_jobs.dataset_parquet.spark', mock_spark):
+    with mock.patch("spark_jobs.dataset_parquet.spark", mock_spark):
         parquet_write(input_path, output_path, mock_schema)
 
     # Check that the spark.read.csv method was called with correct parameters
-    mock_spark.read.csv.assert_called_once_with(input_path, schema=mock_schema, header=True)
+    mock_spark.read.csv.assert_called_once_with(
+        input_path, schema=mock_schema, header=True
+    )
 
     # Check that the DataFrame's write method was called with the expected arguments
     mock_df.write.mode.assert_called_once_with("overwrite")
-    mock_df.write.mode().parquet.assert_called_once_with(output_path, compression="snappy")
+    mock_df.write.mode().parquet.assert_called_once_with(
+        output_path, compression="snappy"
+    )
