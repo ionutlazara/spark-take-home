@@ -1,44 +1,22 @@
+from config import dataset_schema
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import (
-    col,
-    lag,
-    sum as _sum,
-    avg,
-    count,
-    when,
-    unix_timestamp,
-    expr,
-)
+from pyspark.sql.functions import avg, col, count, expr, lag
+from pyspark.sql.functions import sum as _sum
+from pyspark.sql.functions import unix_timestamp, when
 from pyspark.sql.window import Window
-from pyspark.sql.types import (
-    StructType,
-    StructField,
-    StringType,
-    TimestampType,
-    LongType,
-)
-
 
 if __name__ == "__main__":
     # Initialize Spark session
-    spark = SparkSession.builder \
-        .appName("CalculateSessionMetricsOptimized") \
-        .getOrCreate()
+    spark = SparkSession.builder.appName("CalculateSessionMetrics").getOrCreate()
 
     # Define file paths
-    input_user_interactions_path = "/opt/spark/dataset/output/user_interactions_sample.parquet"
-
-    schema_user_interactions = StructType([
-        StructField("user_id", StringType()),
-        StructField("timestamp", TimestampType()),
-        StructField("action_type", StringType()),
-        StructField("page_id", StringType()),
-        StructField("duration_ms", LongType()),
-        StructField("app_version", StringType()),
-    ])
+    input_user_interactions_path = dataset_schema.input_user_interactions_path
+    schema_user_interactions = dataset_schema.schema_user_interactions
 
     # Read csv into dataframe
-    df = spark.read.csv(input_user_interactions_path, schema=schema_user_interactions, header=True)
+    df = spark.read.csv(
+        input_user_interactions_path, schema=schema_user_interactions, header=True
+    )
 
     # Define time gap threshold (e.g., 30 minutes in seconds)
     session_gap = 30 * 60
@@ -72,7 +50,10 @@ if __name__ == "__main__":
 
     # Replace null time_diff values with 0 for session-level calculations
     df_with_sessions = df_with_sessions.withColumn(
-        "time_diff", when(col("time_diff").isNull() | (col("time_diff") > session_gap), 0).otherwise(col("time_diff"))
+        "time_diff",
+        when(col("time_diff").isNull() | (col("time_diff") > session_gap), 0).otherwise(
+            col("time_diff")
+        ),
     )
 
     # Calculate session-level metrics
