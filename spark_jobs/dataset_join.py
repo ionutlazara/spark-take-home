@@ -73,6 +73,6 @@ if __name__ == "__main__":
         "inner",
     ).drop("salted_user_id")
 
-    result.explain(True)
+    result.show()
 
     spark.stop()
